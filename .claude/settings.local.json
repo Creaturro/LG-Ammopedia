@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(claude mcp list:*)",
+      "Bash(cat:*)",
+      "Bash(curl:*)",
+      "Bash(findstr:*)",
+      "Bash(dir /s /b \"%APPDATA%\\Cursor\\User\\globalStorage\")",
+      "Bash(dir \"%APPDATA%\\Cursor\\User\\globalStorage\")",
+      "Bash(node -e \"\nconst fs = require(''fs'');\nconst path = require(''path'');\nconst homedir = require(''os'').homedir();\nconst configPath = path.join(homedir, ''.claude.json'');\nlet data = JSON.parse(fs.readFileSync(configPath, ''utf8''));\ndata.mcpServers = {\n  ''Figma'': {\n    ''type'': ''sse'',\n    ''url'': ''http://127.0.0.1:3845/sse''\n  }\n};\n// Move mcpServers to front\nconst newData = { mcpServers: data.mcpServers };\ndelete data.mcpServers;\nObject.assign(newData, data);\nfs.writeFileSync(configPath, JSON.stringify(newData, null, 2));\nconsole.log(''MCP server added successfully'');\n\")",
+      "Bash(npm create:*)",
+      "Bash(npm install)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run build:*)",
+      "Bash(dir:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}
