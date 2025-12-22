@@ -83,19 +83,38 @@ Przesłanie danych projektowych z Figma do środowiska deweloperskiego.
 - Cursor IDE z zainstalowanym Claude Code
 - Plugin Figma MCP dla VSCode/Cursor
 - Dostęp do projektu w Figma
+- **Projekt w trybie DEV MODE w Figma**
+
+### ⚠️ Tryb DEV w Figma
+
+> **WYMAGANE:** Aby Figma MCP mógł przesłać dane projektowe, projekt musi być w trybie DEV (Developer Mode).
+
+**Włączanie DEV Mode:**
+1. Otwórz projekt w Figma Design
+2. Kliknij przełącznik "Dev Mode" w prawym górnym rogu
+3. Lub użyj skrótu `Shift + D`
+
+**Opcje przesyłania przez MCP:**
+| Zakres | Użycie |
+|--------|--------|
+| Cała strona | Pełny projekt z wszystkimi elementami |
+| Wybrany node | Pojedynczy element/rama |
+| Komponent | Reużywalny komponent z wariantami |
 
 ### Kroki
 
-1. **Skonfiguruj Figma MCP**
+1. **Włącz DEV Mode i skonfiguruj Figma MCP**
    ```
+   - Przełącz projekt w tryb DEV w Figma
    - Zainstaluj plugin Figma MCP w Cursor
    - Połącz z kontem Figma (API token)
-   - Wybierz projekt do synchronizacji
+   - Wybierz projekt/node do synchronizacji
    ```
 
 2. **Pobierz dane projektowe**
    ```
    - Użyj komendy MCP do pobrania struktury
+   - Możesz pobrać całą stronę lub wybrany element
    - Zaimportuj style (kolory, fonty)
    - Pobierz informacje o komponentach
    ```
@@ -461,6 +480,138 @@ Udostępnienie strony publicznie.
 | figma:asset nie działa w CSS | Import jako moduł ES6, wrapper komponent |
 | Sidebar nie pokazuje się | Dodaj `showSidebar: true` w danych |
 | Zmiany nie widoczne | Sprawdź czy push do GitHub się powiódł |
+| Figma MCP nie widzi projektu | Włącz DEV Mode w Figma Design |
+
+---
+
+## Wybór języka i optymalizacja procesu
+
+### Kontekst decyzji
+
+Przy inicjalizacji projektu w Cursor, Claude Code zapytał o wybór języka/frameworka:
+
+| Opcja | Opis |
+|-------|------|
+| **JavaScript + React** | Prostszy, szybszy start, mniej boilerplate |
+| **TypeScript + React** | Type safety, lepsza dokumentacja kodu |
+| **Vue.js** | Alternatywny framework |
+| **Vanilla JS** | Bez frameworka |
+
+### Co wybraliśmy
+W tym projekcie wybraliśmy **JavaScript + React (JSX)** z Vite jako bundler.
+
+### Co robi Figma Make
+Figma Make automatycznie konwertuje kod do **TypeScript (TSX)**:
+- `.jsx` → `.tsx`
+- `.js` → `.ts`
+- Dodaje podstawowe typy
+- Dostosowuje importy do swojego systemu
+
+### 🎯 Rekomendacja na przyszłość
+
+> **OPTYMALIZACJA:** Jeśli wiesz, że kod trafi do Figma Make, **zacznij od TypeScript**.
+
+**Zalety rozpoczęcia w TypeScript:**
+
+| Aspekt | JavaScript → TS (konwersja) | TypeScript od początku |
+|--------|----------------------------|------------------------|
+| Typy | Dodawane automatycznie (podstawowe) | Pełna kontrola, dokładniejsze |
+| Czas | Konwersja w Figma Make | Brak konwersji |
+| Błędy | Mogą pojawić się przy konwersji | Wykrywane na bieżąco |
+| Dokumentacja | Trzeba dodawać interfejsy | Interfejsy od początku |
+| Spójność | Różnice między lokalnym a FM | Identyczny kod |
+
+### Zoptymalizowany workflow
+
+```bash
+# Zamiast:
+npm create vite@latest project-name -- --template react
+
+# Użyj:
+npm create vite@latest project-name -- --template react-ts
+```
+
+**Struktura plików TypeScript:**
+```
+src/
+├── components/
+│   ├── Header.tsx          # zamiast .jsx
+│   ├── CategoryPage.tsx
+│   └── ...
+├── data/
+│   └── categories/
+│       ├── bulletTypes.ts  # zamiast .js
+│       └── ...
+└── types/
+    └── index.ts            # współdzielone interfejsy
+```
+
+**Przykład interfejsów (types/index.ts):**
+```typescript
+export interface CategoryItem {
+  slug: string
+  title: string
+  description: string
+  tags: string[]
+  href: string
+  hasDetailPage: boolean
+  image?: string
+}
+
+export interface CategoryGroup {
+  name: string
+  slug: string
+  items: CategoryItem[]
+}
+
+export interface CategoryData {
+  title: string
+  subtitle: string
+  description: string
+  sidebarImage: string
+  showSidebar?: boolean
+  featured: {
+    hero: string
+    popular: string[]
+  }
+  groups: CategoryGroup[]
+}
+```
+
+### Inne optymalizacje procesu
+
+1. **Obrazki od razu na GitHub**
+   - Uploaduj obrazki do repo przed rozpoczęciem kodowania
+   - Używaj GitHub raw URLs od początku w danych
+   - Unikasz późniejszej konwersji ścieżek
+
+2. **Figma Make asset IDs**
+   - Jeśli masz dostęp do Figma Make wcześniej, pobierz asset IDs dla obrazków UI
+   - Użyj ich bezpośrednio w kodzie (figma:asset/...)
+
+3. **Skonsolidowany format od początku**
+   - Trzymaj kod w strukturze łatwej do eksportu
+   - Unikaj głębokiego zagnieżdżenia katalogów
+   - Mniej plików = łatwiejsze wklejanie
+
+4. **Dokumentacja inline**
+   - Dodawaj komentarze opisujące komponenty
+   - Figma Make zachowuje komentarze
+   - Ułatwia późniejszą pracę w obu środowiskach
+
+---
+
+## Podsumowanie optymalizacji
+
+| Etap | Standardowo | Zoptymalizowany |
+|------|-------------|-----------------|
+| Język | JavaScript (JSX) | TypeScript (TSX) |
+| Obrazki | Lokalne → GitHub później | GitHub od początku |
+| Ścieżki obrazków | /images/*.png | raw.githubusercontent.com/... |
+| Typy | Brak → dodane przez FM | Zdefiniowane od początku |
+| Eksport | Ręczne łączenie plików | Przygotowany format |
+
+**Oszczędność czasu:** ~30-40% mniej pracy przy synchronizacji z Figma Make.
 
 ---
 
