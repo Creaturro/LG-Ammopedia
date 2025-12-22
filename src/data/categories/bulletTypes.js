@@ -7,6 +7,9 @@ const bulletTypesData = {
   subtitle: "Types of",
   description: "Learn about different bullet types used in ammunition. Each bullet type is designed for specific purposes, from target practice to self-defense and hunting.",
 
+  // Sidebar configuration
+  sidebarImage: "/images/sidebar-bullets-new.png",
+
   featured: {
     hero: "fmj",
     popular: ["jhp", "sp", "lrn", "fmj-bt"]

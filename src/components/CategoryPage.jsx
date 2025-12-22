@@ -24,10 +24,13 @@ export default function CategoryPage({ data }) {
     description,
     featured = {},
     groups = [],
+    sidebarImage,
+    showSidebar: forceSidebar,
   } = data
 
   const totalItems = countTotalItems(groups)
-  const showSidebar = totalItems >= 20
+  // Show sidebar if forced via data config OR if 20+ items
+  const showSidebar = forceSidebar === true || totalItems >= 20
 
   // Get featured items
   const heroItem = featured.hero ? findItemBySlug(groups, featured.hero) : null
@@ -80,6 +83,7 @@ export default function CategoryPage({ data }) {
             showSidebar={showSidebar}
             title={title}
             subtitle={subtitle}
+            sidebarImage={sidebarImage}
           />
         )}
 

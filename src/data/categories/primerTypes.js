@@ -6,6 +6,10 @@ const primerTypesData = {
   subtitle: "Types of",
   description: "Primers are the ignition source that starts the firing sequence. Different primer types are designed for specific applications and cartridge sizes.",
 
+  // Sidebar configuration
+  showSidebar: true,
+  sidebarImage: "/images/sidebar-primers.png",
+
   featured: {
     hero: "boxer",
     popular: ["berdan", "small-pistol", "large-rifle"]

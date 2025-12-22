@@ -6,6 +6,10 @@ const casingTypesData = {
   subtitle: "Types of",
   description: "Ammunition casings hold all components together and are essential for proper firearm function. Learn about different casing materials and their characteristics.",
 
+  // Sidebar configuration
+  showSidebar: true,
+  sidebarImage: "/images/sidebar-casings.png",
+
   featured: {
     hero: "brass",
     popular: ["nickel-plated-brass", "steel", "aluminum"]

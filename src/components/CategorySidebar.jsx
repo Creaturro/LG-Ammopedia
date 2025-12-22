@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react'
 
-export default function CategorySidebar({ groups = [], showSidebar = true, title = 'Bullets', subtitle = 'Types of' }) {
+export default function CategorySidebar({
+  groups = [],
+  showSidebar = true,
+  title = 'Bullets',
+  subtitle = 'Types of',
+  sidebarImage = '/images/sidebar-bullets.png'
+}) {
   const [activeGroup, setActiveGroup] = useState('')
 
   // Track scroll position to highlight active group
@@ -38,7 +44,7 @@ export default function CategorySidebar({ groups = [], showSidebar = true, title
     }
   }
 
-  if (!showSidebar || groups.length < 3) return null
+  if (!showSidebar) return null
 
   return (
     <aside className="hidden lg:block w-[260px] flex-shrink-0">
@@ -46,24 +52,23 @@ export default function CategorySidebar({ groups = [], showSidebar = true, title
         className="sticky top-4 rounded-md overflow-hidden"
         style={{
           backgroundColor: '#1a2a1a',
-          backgroundImage: 'url(/images/sidebar-bullets.png)',
+          backgroundImage: `url(${sidebarImage})`,
           backgroundPosition: 'top center',
           backgroundRepeat: 'no-repeat',
           backgroundSize: 'cover',
         }}
       >
-        {/* Hero Section - no overlay, background image shows through */}
-        <div className="relative px-[17px] pt-6 pb-[139px]">
-          {/* Title */}
+        {/* Title Section */}
+        <div className="relative px-[17px] pt-6 pb-[150px]">
           <div className="relative z-10">
             <p
-              className="text-[#f6ec42] text-[40px] leading-[0.98] font-light"
+              className="text-[#f9fafb] text-[40px] leading-[0.98] font-light"
               style={{ fontFamily: "'Open Sans Condensed', sans-serif" }}
             >
               {subtitle}
             </p>
             <p
-              className="text-[#f6ec42] text-[65px] leading-[0.98] font-bold tracking-[-3px]"
+              className="text-[#f9fafb] text-[65px] leading-[0.98] font-bold tracking-[-3px]"
               style={{ fontFamily: "'Open Sans Condensed', sans-serif" }}
             >
               {title}
@@ -71,7 +76,7 @@ export default function CategorySidebar({ groups = [], showSidebar = true, title
           </div>
         </div>
 
-        {/* Navigation Section - no background, bullet image shows through */}
+        {/* Navigation Section - transparent background, image shows through */}
         <div className="px-[17px] pt-[21px] pb-5">
           {/* Jump To Header */}
           <h4
