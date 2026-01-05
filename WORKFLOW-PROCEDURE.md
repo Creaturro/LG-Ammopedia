@@ -51,9 +51,67 @@ public/images/
 
 ### Wymagania
 - Projekt w trybie **DEV Mode** (`Shift + D`)
-- Figma MCP skonfigurowany
+- Figma MCP skonfigurowany (patrz sekcja poniżej)
 
-### Kroki
+### Figma MCP - Konfiguracja
+
+**MCP (Model Context Protocol)** pozwala Claude Code bezpośrednio pobierać dane z Figma przez wklejenie linku.
+
+#### Jednorazowa konfiguracja (raz na komputer)
+
+**Krok 1:** Znajdź plik konfiguracji Claude Code:
+```
+C:\Users\[TwójUser]\.claude.json
+```
+
+**Krok 2:** Dodaj sekcję `mcpServers` do pliku:
+```json
+{
+  "mcpServers": {
+    "Figma": {
+      "type": "sse",
+      "url": "http://127.0.0.1:3845/sse"
+    }
+  }
+}
+```
+
+> **Uwaga:** Jeśli plik już istnieje i ma inne wpisy, dodaj tylko sekcję `mcpServers` (nie nadpisuj całego pliku).
+
+**Krok 3:** Restart Cursor / Claude Code
+
+#### Przy każdym użyciu
+
+1. **Otwórz plik w Figma Desktop** (nie w przeglądarce!)
+2. **Włącz Dev Mode:** `Shift + D`
+3. **Wklej link do Claude Code**
+
+#### Jak to działa
+
+```
+┌─────────────────────┐         ┌─────────────────────┐
+│   Figma Desktop     │         │    Claude Code      │
+│   (Dev Mode ON)     │         │                     │
+│                     │         │  .claude.json:      │
+│  Serwer MCP startuje│ ◄─────► │  mcpServers.Figma   │
+│  na porcie 3845     │   SSE   │  → 127.0.0.1:3845   │
+└─────────────────────┘         └─────────────────────┘
+```
+
+#### Użycie
+
+Wklej link Figma do Claude Code:
+
+```
+@https://www.figma.com/design/eO8FTZS1l7XPK3cSqX8Ft9/LG-Ammopedia?node-id=215-79
+```
+
+Claude automatycznie:
+1. Pobierze dane designu (layout, style, wymiary)
+2. Wygeneruje kod React + Tailwind
+3. Pobierze screenshot node'a dla kontekstu wizualnego
+
+### Kroki (klasyczna metoda - Copy Example Prompt)
 
 1. **Włącz DEV Mode** w Figma Design
 
@@ -135,7 +193,7 @@ Figma Make użyje tych URLs do wyświetlania obrazków produktów.
 ### Ograniczenie Figma Make
 > Figma Make nie przyjmuje paczek plików. Wymaga wklejenia kodu w jednej wiadomości.
 
-### Format wklejania
+### Format wklejania kodu
 
 Poproś Claude Code:
 ```
@@ -155,30 +213,77 @@ Output:
 [zawartość]
 ```
 
-### Lista obrazków
+### Format mapowania obrazków
 
-Poproś Claude Code:
 ```
-"Wylistuj wszystkie obrazki z public/images/"
+KATEGORIA: [Nazwa Grupy]
+---
+slug-produktu-1 -> nazwa_pliku_1.png
+slug-produktu-2 -> nazwa_pliku_2.jpg
+
+KATEGORIA: [Następna Grupa]
+---
+inny-slug -> inny_plik.png
+```
+
+Przykład:
+```
+KATEGORIA: FMJ Variants
+---
+fmj -> freepik__fmj-full-metal-jacket.png
+fmj-bt -> freepik__fmjbt-boat-tail.png
+tmj -> freepik__tmj-total-metal-jacket.png
+```
+
+### Checklist przed wklejeniem
+
+```
+☐ Kod skonsolidowany (format === path/file ===)
+☐ Obrazki pushowane do GitHub
+☐ Lista mapowań obrazków (slug -> filename)
+☐ Sidebar image uploadowany do Figma (dla figma:asset)
+☐ Route/hash określony (np. #bullets)
+☐ Featured hero i popular items określone
 ```
 
 ---
 
 ## Faza 6: Integracja w Figma Make
 
-1. **Wklej kod** do Figma Make Assistant
+### Szablon żądania dla Make
 
-2. **Obrazki sidebar** - Figma Make używa `figma:asset`:
+```markdown
+## Integracja kategorii "[NAZWA]"
+
+### Kod
+[wklej skonsolidowany kod]
+
+### Obrazki produktów
+Bazowy URL: https://raw.githubusercontent.com/user/repo/main/public/images/
+
+KATEGORIA: [Grupa 1]
+---
+slug-1 -> filename_1.png
+slug-2 -> filename_2.png
+
+### Konfiguracja
+- Route: #[hash-name]
+- Sidebar: TAK/NIE
+- Featured hero: "[slug]"
+- Featured popular: ["slug1", "slug2"]
+```
+
+### Jak Make przetwarza obrazki
+
+1. **Obrazki sidebar** - używa `figma:asset`:
    ```typescript
    import sidebarImg from "figma:asset/55c77bb6...png"
    ```
 
-3. **Obrazki produktów** - zamień na GitHub raw URLs:
+2. **Obrazki produktów** - zamienia na GitHub raw URLs:
    ```typescript
    image: "https://raw.githubusercontent.com/user/repo/main/public/images/product.png"
    ```
-
-4. **Wklej listę obrazków** - Figma Make zamieni ścieżki
 
 ---
 
@@ -214,7 +319,11 @@ Poproś Claude Code:
 
 | Problem | Rozwiązanie |
 |---------|-------------|
-| Figma MCP nie widzi projektu | Włącz DEV Mode (`Shift + D`) |
+| Figma MCP nie widzi projektu | Włącz DEV Mode (`Shift + D`) w Figma Desktop |
+| Port 3845 nie nasłuchuje | Otwórz Figma Desktop (nie przeglądarkę) i włącz Dev Mode |
+| Claude nie widzi MCP serwera | Sprawdź `C:\Users\[User]\.claude.json` - musi mieć sekcję `mcpServers` |
+| Brak pliku .claude.json | Utwórz go ręcznie z konfiguracją MCP (patrz Faza 2) |
+| Claude nie rozpoznaje linku Figma | Wklej link z `@` lub bez - oba działają |
 | Figma Make nie widzi obrazków | Użyj GitHub raw URLs |
 | figma:asset nie działa w CSS | Import jako moduł ES6 |
 
@@ -232,4 +341,4 @@ Poproś Claude Code:
 
 ---
 
-*Procedura: 2025-12-22 | Projekt: LG Ammopedia*
+*Procedura: 2025-01-05 | Projekt: LG Ammopedia*

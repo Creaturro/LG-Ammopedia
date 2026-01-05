@@ -6,12 +6,13 @@ const ChevronRight = () => (
   </svg>
 )
 
-function HeroCard({ item }) {
+function HeroCard({ item, categoryRoute }) {
   if (!item) return null
+  const detailUrl = categoryRoute && item.slug ? `#${categoryRoute}/${item.slug}` : item.href
 
   return (
     <a
-      href={item.href}
+      href={detailUrl}
       className="bg-[#10331f] rounded-md overflow-hidden flex flex-col h-full hover:shadow-xl transition-shadow min-w-0"
     >
       {/* Image */}
@@ -53,12 +54,13 @@ function HeroCard({ item }) {
   )
 }
 
-function PopularCard({ item }) {
+function PopularCard({ item, categoryRoute }) {
   if (!item) return null
+  const detailUrl = categoryRoute && item.slug ? `#${categoryRoute}/${item.slug}` : item.href
 
   return (
     <a
-      href={item.href}
+      href={detailUrl}
       className="bg-[#10331f] rounded-md overflow-hidden flex flex-col hover:ring-1 hover:ring-[#0d7339] hover:shadow-lg transition-all duration-200 min-w-0"
     >
       {/* Image - larger and prominent */}
@@ -86,7 +88,7 @@ function PopularCard({ item }) {
   )
 }
 
-export default function FeaturedSection({ heroItem, popularItems = [], title = "Editor's Picks", subtitle = "Explore our curated selection of essential ammunition knowledge", categoryTitle = "" }) {
+export default function FeaturedSection({ heroItem, popularItems = [], title = "Editor's Picks", subtitle = "Explore our curated selection of essential ammunition knowledge", categoryTitle = "", categoryRoute = "" }) {
   if (!heroItem && popularItems.length === 0) return null
 
   return (
@@ -126,13 +128,13 @@ export default function FeaturedSection({ heroItem, popularItems = [], title = "
       <div className="flex flex-col lg:flex-row gap-2 lg:gap-[2px]">
         {/* Hero Card - full width on mobile, half on desktop */}
         <div className="w-full lg:w-1/2">
-          <HeroCard item={heroItem} />
+          <HeroCard item={heroItem} categoryRoute={categoryRoute} />
         </div>
 
         {/* Popular Items Grid - 2x2 */}
         <div className="w-full lg:w-1/2 grid grid-cols-2 gap-2 lg:gap-[2px] mt-2 lg:mt-0">
           {popularItems.slice(0, 4).map((item, index) => (
-            <PopularCard key={index} item={item} />
+            <PopularCard key={index} item={item} categoryRoute={categoryRoute} />
           ))}
         </div>
       </div>

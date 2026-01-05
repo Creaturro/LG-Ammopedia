@@ -17,7 +17,7 @@ function countTotalItems(groups) {
   return groups.reduce((total, group) => total + (group.items?.length || 0), 0)
 }
 
-export default function CategoryPage({ data }) {
+export default function CategoryPage({ data, categoryRoute = '' }) {
   const {
     title,
     subtitle,
@@ -96,6 +96,7 @@ export default function CategoryPage({ data }) {
               popularItems={popularItems}
               subtitle={`Explore our curated selection of ${title.toLowerCase()}`}
               categoryTitle={subtitle ? `${subtitle} ${title}` : title}
+              categoryRoute={categoryRoute}
             />
           )}
 
@@ -110,7 +111,8 @@ export default function CategoryPage({ data }) {
                   description={item.description}
                   image={item.image}
                   tags={item.tags}
-                  href={item.href}
+                  slug={item.slug}
+                  categoryRoute={categoryRoute}
                   hasDetailPage={item.hasDetailPage !== false}
                 />
               ))}
@@ -126,6 +128,7 @@ export default function CategoryPage({ data }) {
                 hasSidebar={showSidebar}
                 maxItems={showSidebar ? 6 : 8}
                 categoryTitle={subtitle ? `${subtitle} ${title}` : title}
+                categoryRoute={categoryRoute}
               />
             ))
           )}

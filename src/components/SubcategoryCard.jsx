@@ -11,9 +11,12 @@ export default function SubcategoryCard({
   description,
   image,
   tags = [],
-  href,
+  slug,
+  categoryRoute,
   hasDetailPage = true,
 }) {
+  // Construct hash-based URL for detail page
+  const detailUrl = categoryRoute && slug ? `#${categoryRoute}/${slug}` : null
   const cardContent = (
     <>
       {/* Image */}
@@ -75,10 +78,10 @@ export default function SubcategoryCard({
   )
 
   // Wrapper - link if has detail page, div if not
-  if (hasDetailPage && href) {
+  if (hasDetailPage && detailUrl) {
     return (
       <a
-        href={href}
+        href={detailUrl}
         className="bg-[#f5f5f5] rounded-md flex flex-col h-full border border-transparent hover:border-[#0d7339] transition-colors duration-200 min-w-0 overflow-hidden"
       >
         {cardContent}

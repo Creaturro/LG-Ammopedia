@@ -21,6 +21,7 @@ export default function GroupSection({
   maxItems = 6, // Show max items before "View All"
   hasSidebar = false,
   categoryTitle = '',
+  categoryRoute = '',
 }) {
   const [isExpanded, setIsExpanded] = useState(true)
   const [showAll, setShowAll] = useState(false)
@@ -93,7 +94,8 @@ export default function GroupSection({
               description={item.description}
               image={item.image}
               tags={item.tags}
-              href={item.href}
+              slug={item.slug}
+              categoryRoute={categoryRoute}
               hasDetailPage={item.hasDetailPage !== false}
             />
           ))}
