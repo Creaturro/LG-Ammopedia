@@ -5,6 +5,7 @@ Użyj jako kontekst gdy user:
 - Chce opublikować stronę (Figma Make)
 - Ma problem z obrazkami (GitHub raw URLs)
 - Potrzebuje konfiguracji MCP (.claude.json)
+- Pyta o setup nowego projektu (TypeScript + Tailwind)
 -->
 
 # Figma MCP → Claude Code - Uniwersalny Workflow
@@ -19,7 +20,7 @@ Użyj jako kontekst gdy user:
 
 ```
 📐 Figma Design  →  💻 Claude Code  →  🖼️ GitHub  →  🌐 Figma Make
-   (wklej link)      (React+Tailwind)   (obrazki)     (publikacja)
+   (wklej link)      (React+TS+Tailwind)  (obrazki)    (publikacja)
                                                             ↓
                                               ✅ [twoja-strona].figma.site
 ```
@@ -27,6 +28,7 @@ Użyj jako kontekst gdy user:
 ### Co zyskujesz:
 
 - **Połączenie Figma ↔ Claude** — wklejasz link, dostajesz kod z dokładnymi wartościami
+- **TypeScript od startu** — pełna kompatybilność z Figma Make, bez konwersji
 - **Hosting obrazków** — GitHub raw URLs działają wszędzie za darmo
 - **Publikacja bez serwera** — Figma Make hostuje na figma.site
 
@@ -34,16 +36,167 @@ Użyj jako kontekst gdy user:
 
 ## Spis treści
 
-1. [Jednorazowa konfiguracja](#1-jednorazowa-konfiguracja)
-2. [Użycie w projekcie](#2-użycie-w-projekcie)
-3. [Co otrzymujesz z Figma](#3-co-otrzymujesz-z-figma)
-4. [GitHub Raw URLs - hosting obrazków](#4-github-raw-urls---hosting-obrazków)
-5. [Figma Make - publikacja](#5-figma-make---publikacja)
-6. [Troubleshooting](#6-troubleshooting)
+1. [Setup projektu TypeScript](#1-setup-projektu-typescript)
+2. [Jednorazowa konfiguracja MCP](#2-jednorazowa-konfiguracja-mcp)
+3. [Użycie w projekcie](#3-użycie-w-projekcie)
+4. [Co otrzymujesz z Figma](#4-co-otrzymujesz-z-figma)
+5. [GitHub Raw URLs - hosting obrazków](#5-github-raw-urls---hosting-obrazków)
+6. [Figma Make - publikacja](#6-figma-make---publikacja)
+7. [Troubleshooting](#7-troubleshooting)
 
 ---
 
-## 1. Jednorazowa konfiguracja
+## 1. Setup projektu TypeScript
+
+**WAŻNE:** Zawsze startuj nowe projekty z TypeScript. Figma Make natywnie obsługuje TypeScript - bez konwersji, bez problemów.
+
+### Dlaczego TypeScript?
+
+| Aspekt | JavaScript (JSX) | TypeScript (TSX) |
+|--------|------------------|------------------|
+| Figma Make | Wymaga konwersji | Natywna obsługa ✅ |
+| Autocomplete | Podstawowy | Pełny z typami ✅ |
+| Błędy | Runtime (produkcja) | Compile-time (dev) ✅ |
+| Refactoring | Ryzykowny | Bezpieczny ✅ |
+
+### Krok 1: Inicjalizacja projektu Vite + React + TypeScript
+
+```bash
+npm create vite@latest nazwa-projektu -- --template react-ts
+cd nazwa-projektu
+npm install
+```
+
+### Krok 2: Instalacja Tailwind CSS
+
+```bash
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+```
+
+### Krok 3: Konfiguracja Tailwind
+
+**tailwind.config.js:**
+```javascript
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+```
+
+**src/index.css:**
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+### Krok 4: Struktura projektu
+
+```
+projekt/
+├── public/
+│   └── images/           # Obrazki (później GitHub raw URLs)
+├── src/
+│   ├── components/       # Komponenty React (.tsx)
+│   │   ├── Header.tsx
+│   │   ├── Footer.tsx
+│   │   └── Card.tsx
+│   ├── data/             # Dane (.ts)
+│   │   └── products.ts
+│   ├── types/            # Definicje typów (.ts)
+│   │   └── index.ts
+│   ├── App.tsx
+│   ├── main.tsx
+│   └── index.css
+├── tailwind.config.js
+├── tsconfig.json         # Auto-generowany przez Vite
+└── package.json
+```
+
+### Krok 5: Podstawowe typy (opcjonalnie, ale zalecane)
+
+**src/types/index.ts:**
+```typescript
+// Przykładowe typy dla projektu
+export interface Product {
+  slug: string;
+  title: string;
+  description: string;
+  image: string;
+  tags: string[];
+  hasDetailPage: boolean;
+}
+
+export interface Category {
+  title: string;
+  subtitle: string;
+  description: string;
+  groups: Group[];
+}
+
+export interface Group {
+  name: string;
+  slug: string;
+  items: Product[];
+}
+```
+
+### Krok 6: Przykładowy komponent TypeScript
+
+**src/components/Card.tsx:**
+```typescript
+interface CardProps {
+  title: string;
+  description: string;
+  image: string;
+  tags?: string[];
+  onClick?: () => void;
+}
+
+export default function Card({ title, description, image, tags = [], onClick }: CardProps) {
+  return (
+    <div
+      className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+      onClick={onClick}
+    >
+      <img src={image} alt={title} className="w-full h-48 object-cover" />
+      <div className="p-4">
+        <h3 className="font-bold text-lg mb-2">{title}</h3>
+        <p className="text-gray-600 text-sm">{description}</p>
+        {tags.length > 0 && (
+          <div className="flex gap-2 mt-3">
+            {tags.map((tag, i) => (
+              <span key={i} className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+```
+
+### Krok 7: Uruchomienie
+
+```bash
+npm run dev
+```
+
+Projekt gotowy pod Figma MCP i Make!
+
+---
+
+## 2. Jednorazowa konfiguracja MCP
 
 Te kroki wykonujesz **raz na komputer**. Potem działa dla wszystkich projektów.
 
@@ -100,7 +253,7 @@ Po restarcie sprawdź czy MCP jest wykrywany:
 
 ---
 
-## 2. Użycie w projekcie
+## 3. Użycie w projekcie
 
 ### Przed każdą sesją:
 
@@ -133,7 +286,7 @@ Po restarcie sprawdź czy MCP jest wykrywany:
 
 ---
 
-## 3. Co otrzymujesz z Figma
+## 4. Co otrzymujesz z Figma
 
 ### Dane strukturalne:
 - Hierarchia elementów (frames, groups, components)
@@ -142,15 +295,19 @@ Po restarcie sprawdź czy MCP jest wykrywany:
 - Nazwy warstw (data-name)
 
 ### Wygenerowany kod:
-```jsx
-// Przykład output z Figma MCP
+```typescript
+// Przykład output z Figma MCP (TypeScript)
 const imgIcon = "http://localhost:3845/assets/abc123.svg";
 
-export default function Component() {
+interface ComponentProps {
+  label?: string;
+}
+
+export default function Component({ label = "Label" }: ComponentProps) {
   return (
     <div className="flex items-center gap-4 p-6 bg-white border border-gray-200">
       <img src={imgIcon} alt="" className="w-8 h-8" />
-      <span className="text-sm text-black">Label</span>
+      <span className="text-sm text-black">{label}</span>
     </div>
   );
 }
@@ -163,7 +320,7 @@ export default function Component() {
 
 ---
 
-## 4. GitHub Raw URLs - hosting obrazków
+## 5. GitHub Raw URLs - hosting obrazków
 
 Obrazki z Figma MCP (`localhost:3845`) działają tylko podczas sesji. Dla produkcji użyj **GitHub Raw URLs**.
 
@@ -214,15 +371,15 @@ git push -u origin main
 #### Krok 3: Użycie w kodzie
 
 **Lokalny development:**
-```jsx
+```typescript
 // Działa lokalnie
-<img src="/images/product-1.png" />
+<img src="/images/product-1.png" alt="Product" />
 ```
 
 **Produkcja / Figma Make:**
-```jsx
+```typescript
 // Działa wszędzie
-<img src="https://raw.githubusercontent.com/user/repo/main/public/images/product-1.png" />
+<img src="https://raw.githubusercontent.com/user/repo/main/public/images/product-1.png" alt="Product" />
 ```
 
 ### Generowanie listy URL
@@ -264,7 +421,7 @@ inny-slug -> inny_plik.png
 
 ---
 
-## 5. Figma Make - publikacja
+## 6. Figma Make - publikacja
 
 Figma Make to narzędzie do konwersji kodu na interaktywną stronę hostowaną na serwerach Figma.
 
@@ -283,7 +440,7 @@ Cursor (kod) ──(wklej)──► Figma Make ──(publikuj)──► figma.s
 |--------------|-------------|
 | Nie przyjmuje paczek plików | Skonsoliduj kod w jedną wiadomość |
 | Nie widzi lokalnych obrazków | Użyj GitHub raw URLs |
-| Konwertuje JS → TypeScript | Zacznij od TypeScript |
+| ~~Konwertuje JS → TypeScript~~ | ✅ Rozwiązane - startuj od TypeScript |
 
 ### Format wklejania kodu
 
@@ -296,14 +453,30 @@ z separatorami === ścieżka/plik ===
 **Output:**
 ```
 === src/App.tsx ===
-import React from 'react';
+import Header from './components/Header';
+import Footer from './components/Footer';
 // ... kod
 
 === src/components/Header.tsx ===
-// ... kod
+interface HeaderProps {
+  title: string;
+}
+export default function Header({ title }: HeaderProps) {
+  // ... kod
+}
 
 === src/data/products.ts ===
-// ... dane
+import { Product } from '../types';
+export const products: Product[] = [
+  // ... dane
+];
+
+=== src/types/index.ts ===
+export interface Product {
+  slug: string;
+  title: string;
+  // ... typy
+}
 ```
 
 ### Szablon żądania dla Figma Make
@@ -323,7 +496,7 @@ product-1.png -> https://raw.githubusercontent.com/user/repo/main/public/images/
 
 ### Konfiguracja
 - Route: #[hash-name] (jeśli dotyczy)
-- Framework: React + Tailwind CSS
+- Framework: React + TypeScript + Tailwind CSS
 ```
 
 ### Obsługa obrazków w Figma Make
@@ -341,22 +514,29 @@ import logoImg from "figma:asset/abc123...png"
 
 Użyj GitHub raw URLs:
 ```typescript
-const products = [
+interface Product {
+  name: string;
+  image: string;
+}
+
+const products: Product[] = [
   {
     name: "Produkt 1",
     image: "https://raw.githubusercontent.com/user/repo/main/public/images/product-1.png"
   }
-]
+];
 ```
 
 ### Checklist przed publikacją
 
 ```
-☐ Kod skonsolidowany (format === path/file ===)
+☐ Projekt utworzony z template react-ts (Vite)
+☐ Kod skonsolidowany (format === path/file.tsx ===)
+☐ Wszystkie pliki to .tsx / .ts (NIE .jsx / .js)
+☐ Interfejsy zdefiniowane dla props komponentów
 ☐ Obrazki pushowane do GitHub
 ☐ GitHub raw URLs wygenerowane
-☐ TypeScript (nie JavaScript)
-☐ Brak błędów w konsoli (sprawdź lokalnie)
+☐ Brak błędów TypeScript (npm run build)
 ☐ Responsywność przetestowana
 ```
 
@@ -379,7 +559,7 @@ const products = [
 
 ---
 
-## 6. Troubleshooting
+## 7. Troubleshooting
 
 ### Problem: Claude nie pobiera danych z linku Figma
 
@@ -460,6 +640,15 @@ Dla produkcji użyj:
 ## Szybka ściągawka
 
 ```bash
+# 0. NOWY PROJEKT (TypeScript + Tailwind)
+npm create vite@latest moj-projekt -- --template react-ts
+cd moj-projekt
+npm install
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+# Skonfiguruj tailwind.config.js i src/index.css (patrz sekcja 1)
+npm run dev
+
 # 1. Konfiguracja MCP (raz na komputer)
 # Edytuj: C:\Users\[User]\.claude.json (Windows) lub ~/.claude.json (Mac)
 # Dodaj: "mcpServers": { "Figma": { "type": "sse", "url": "http://127.0.0.1:3845/sse" } }
@@ -471,6 +660,7 @@ Dla produkcji użyj:
 
 # 3. W Claude Code
 # Wklej: https://www.figma.com/design/xxx/Project?node-id=123-456
+# WAŻNE: Poproś o kod TypeScript (.tsx / .ts)
 
 # 4. Weryfikacja MCP
 netstat -ano | findstr "3845"   # Powinno pokazać LISTENING
@@ -480,9 +670,12 @@ netstat -ano | findstr "3845"   # Powinno pokazać LISTENING
 # Push: git add . && git commit -m "Add images" && git push
 
 # 6. Figma Make
-# - Poproś Claude: "Skonsoliduj kod z separatorami === path/file ==="
+# - Poproś Claude: "Skonsoliduj kod TypeScript z separatorami === path/file.tsx ==="
 # - Wklej do Figma Make
 # - Publish → [nazwa].figma.site
+
+# 7. Weryfikacja TypeScript przed publikacją
+npm run build   # Musi przejść bez błędów!
 ```
 
 ---
